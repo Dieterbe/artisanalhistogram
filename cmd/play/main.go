@@ -6,9 +6,10 @@ import (
 )
 
 // to achieve the goals from the README, here are the implementation tricks
-// math.MaxUint32, i.e. 4294967295 should be a reasonable count limit. to save space.
-// it's easy to warn operators if they get too close to the limit and make them upgrade to structures with more size or shorten reporting interval, and we can invalidate numbers if we detect an overflow
-// proposal2 limits all data within 1 cacheline. i have no idea if it makes sense to do this.
+// * math.MaxUint32, i.e. 4294967295 should be a reasonable count limit. to save space.
+//   (it's easy to warn operators if they get too close to the limit and make them upgrade to bigger structures
+//   or shorter their reporting interval, and we can invalidate numbers if we detect an almost overflow)
+// * proposal2 limits the size of the histogram to 64B aka 1 cacheline. i have no idea if it makes sense.
 
 // in ms
 // fairly well spread out and good balance between error % and bucket understandability
