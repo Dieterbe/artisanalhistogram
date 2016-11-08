@@ -12,3 +12,4 @@ this is an expirement. the reasoning/goals/tradeoffs need more validation.
 
 I *think* these requirements make https://github.com/codahale/hdrhistogram and https://github.com/VividCortex/gohistogram poor fits, but TBH I have to investigate them again.
 
+First look at https://github.com/Dieterbe/simplehistogram/blob/master/cmd/play/main.go and then https://github.com/Dieterbe/simplehistogram/blob/master/hist2/hist2.go
