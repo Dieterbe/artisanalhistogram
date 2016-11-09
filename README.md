@@ -7,7 +7,6 @@ Also somewhat experimental.
 
 ### goals
 
-* reasonable performance (inserts now up to +- 20ns, could be improved more at cost of readability)
 * optimize for typical range of networked applications, where we care for durations between roughly 1ms and 15s.
   anything under a ms is plenty fast.  Even if it was a a microsecond or less, we don't mind it being reported in the 1ms bucket.
   Likewise, anything over 10s is awful.  Whether it's 10s or 30s. Both are terrible and can go in the same bucket.
@@ -21,6 +20,29 @@ Also somewhat experimental.
 * consistent bucket sizes across different histograms so we can easily aggregate different histograms together (e.g. for timeseries rollups or runtime consolidation).
 (this rules out [gohistogram](https://github.com/VividCortex/gohistogram)
 * give equal weight to all samples within a given observation interval, and no weight to samples from prior intervals (contrast to EWMA based approaches)
+* good enough performance to not be an overhead for applications doing millions of histogram adds per second.  See below
+
+### performance
+
+Performance is not riduculously fast like [some of the histograms](https://github.com/dgryski/go-linlog) that only need a few instructions per Add because their buckets have boundaries optimized for powers of two.  We have "human friendly" buckets, so our adds are up to about 20ns (e.g. 1M/second at 5% cpu usage).  which is fast enough for now, but could be improved more later.
+Getting a report takes about 700ns.
+
+On my i7-4810MQ CPU @ 2.80GHz : 
+
+```
+$ go test -bench=.
+Benchmark_AddDurationBest-8               	200000000	         7.35 ns/op
+Benchmark_AddDurationWorst-8              	100000000	        16.6 ns/op
+Benchmark_AddDurationEvenDistribution-8   	100000000	        20.0 ns/op
+Benchmark_AddDurationUpto1s-8             	100000000	        17.0 ns/op
+Benchmark_Report1kvals-8                  	 2000000	       660 ns/op
+PASS
+ok  	github.com/Dieterbe/artisanalhistogram/hist1	102.424s
+```
+### warning
+
+if it wasn't clear yet, you need to understand the implications of this approach. For data <1ms or >15s the data will be significantly different from actual results, however, the conclusions
+will be the same (in the first case "everything is great" and in the latter "our system is doing terribly"). statistical summaries such as means which are already misleading on their own can get even more misleading, so pay attention to what the histogram buckets say. Those are the source of thruth.
 
 
 ### buckets
