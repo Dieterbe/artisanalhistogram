@@ -6,6 +6,35 @@ import (
 	"time"
 )
 
+func Test_SearchBucket(t *testing.T) {
+	hist := New() // we just want access to the buckets.
+	cases := []struct {
+		val    uint32
+		bucket int
+	}{
+		{0, 0},
+		{1, 0},
+		{999, 0},
+		{1000, 0},
+		{50000, 10},
+		{50001, 11},
+		{64449, 11},
+		{65000, 11},
+		{65001, 12},
+		{15000000, 30},
+		{15000001, 31},
+		{25000000, 31},
+		{99000000, 31},
+		{4293000000, 31}, // anything higher than this is undefined
+	}
+	for _, cas := range cases {
+		bucket := searchBucket(hist.limits, cas.val)
+		if bucket != cas.bucket {
+			t.Fatalf("expected %d to be in bucket %d, got bucket %d", cas.val, cas.bucket, bucket)
+		}
+	}
+}
+
 func Test_Report(t *testing.T) {
 	hist := New()
 	hist.AddDuration(time.Duration(10) * time.Microsecond)
