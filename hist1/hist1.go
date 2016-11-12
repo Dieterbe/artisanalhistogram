@@ -150,6 +150,7 @@ func (h *Hist1) Report(data []uint32) Report {
 }
 
 // quantile q means what's the value v so that all q of the values have value <= v
+// TODO since we typically get 99%, 99.9%, 75%, etc. it should be faster to count the other way
 func Quantile(data []uint32, q float64, total uint64) int {
 	count := q * float64(total)
 	for i := 0; i < 32; i++ {
