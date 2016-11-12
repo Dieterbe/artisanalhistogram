@@ -1,120 +1,83 @@
 package hist1
 
 import (
+	"math"
 	"sync/atomic"
 	"time"
 )
 
-// in micros
-var buckets = []int{
-	1000,
-	2000,
-	3000,
-	5000,
-	7500,
-	10000,
-	15000,
-	20000,
-	30000,
-	40000,
-	50000,
-	65000,
-	80000,
-	100000,
-	150000,
-	200000,
-	300000,
-	400000,
-	500000,
-	650000,
-	800000,
-	1000000,
-	1500000,
-	2000000,
-	3000000,
-	4000000,
-	5000000,
-	6500000,
-	8000000,
-	10000000,
-	15000000,
-	29999999, // used to represent inf
-}
+const maxVal = uint32(29999999) // used to report max number as 29s even if it's higher
 
 type Hist1 struct {
+	limits [32]uint32 // in micros
 	counts [32]uint32
 }
 
 func New() Hist1 {
-	return Hist1{}
+	return Hist1{
+		limits: [32]uint32{
+			1000,           // 0
+			2000,           // 1
+			3000,           // 2
+			5000,           // 3
+			7500,           // 4
+			10000,          // 5
+			15000,          // 6
+			20000,          // 7
+			30000,          // 8
+			40000,          // 9
+			50000,          // 10
+			65000,          // 11
+			80000,          // 12
+			100000,         // 13
+			150000,         // 14
+			200000,         // 15
+			300000,         // 16
+			400000,         // 17
+			500000,         // 18
+			650000,         // 19
+			800000,         // 20
+			1000000,        // 21
+			1500000,        // 22
+			2000000,        // 23
+			3000000,        // 24
+			4000000,        // 25
+			5000000,        // 26
+			6500000,        // 27
+			8000000,        // 28
+			10000000,       // 29
+			15000000,       // 30
+			math.MaxUint32, // 31 // to ease binary search, but will be reported as 29s
+		},
+	}
+}
+
+// searchBucket implements a binary search, to find the bucket i to insert val in, like so:
+// limits[i-1] < val <= limits[i]
+// if we can convince the go compiler to inline this we can get a 14~22% speedup (verified by manually patching it in)
+// but we can't :( see https://github.com/golang/go/issues/17566
+func searchBucket(limits [32]uint32, val uint32) int {
+	min, i, max := 0, 16, 32
+	for {
+		if val <= limits[i] {
+			if i == 0 || val > limits[i-1] {
+				return i
+			}
+			max = i
+		} else {
+			min = i
+		}
+		i = min + ((max - min) / 2)
+	}
 }
 
 func (h *Hist1) AddDuration(value time.Duration) {
-	if value <= time.Duration(1)*time.Millisecond {
-		atomic.AddUint32(&h.counts[0], 1)
-	} else if value <= time.Duration(2)*time.Millisecond {
-		atomic.AddUint32(&h.counts[1], 1)
-	} else if value <= time.Duration(3)*time.Millisecond {
-		atomic.AddUint32(&h.counts[2], 1)
-	} else if value <= time.Duration(5)*time.Millisecond {
-		atomic.AddUint32(&h.counts[3], 1)
-	} else if value <= time.Duration(7500)*time.Microsecond {
-		atomic.AddUint32(&h.counts[4], 1)
-	} else if value <= time.Duration(10)*time.Millisecond {
-		atomic.AddUint32(&h.counts[5], 1)
-	} else if value <= time.Duration(15)*time.Millisecond {
-		atomic.AddUint32(&h.counts[6], 1)
-	} else if value <= time.Duration(20)*time.Millisecond {
-		atomic.AddUint32(&h.counts[7], 1)
-	} else if value <= time.Duration(30)*time.Millisecond {
-		atomic.AddUint32(&h.counts[8], 1)
-	} else if value <= time.Duration(40)*time.Millisecond {
-		atomic.AddUint32(&h.counts[9], 1)
-	} else if value <= time.Duration(50)*time.Millisecond {
-		atomic.AddUint32(&h.counts[10], 1)
-	} else if value <= time.Duration(65)*time.Millisecond {
-		atomic.AddUint32(&h.counts[11], 1)
-	} else if value <= time.Duration(80)*time.Millisecond {
-		atomic.AddUint32(&h.counts[12], 1)
-	} else if value <= time.Duration(100)*time.Millisecond {
-		atomic.AddUint32(&h.counts[13], 1)
-	} else if value <= time.Duration(150)*time.Millisecond {
-		atomic.AddUint32(&h.counts[14], 1)
-	} else if value <= time.Duration(200)*time.Millisecond {
-		atomic.AddUint32(&h.counts[15], 1)
-	} else if value <= time.Duration(300)*time.Millisecond {
-		atomic.AddUint32(&h.counts[16], 1)
-	} else if value <= time.Duration(400)*time.Millisecond {
-		atomic.AddUint32(&h.counts[17], 1)
-	} else if value <= time.Duration(500)*time.Millisecond {
-		atomic.AddUint32(&h.counts[18], 1)
-	} else if value <= time.Duration(650)*time.Millisecond {
-		atomic.AddUint32(&h.counts[19], 1)
-	} else if value <= time.Duration(800)*time.Millisecond {
-		atomic.AddUint32(&h.counts[20], 1)
-	} else if value <= time.Duration(1000)*time.Millisecond {
-		atomic.AddUint32(&h.counts[21], 1)
-	} else if value <= time.Duration(1500)*time.Millisecond {
-		atomic.AddUint32(&h.counts[22], 1)
-	} else if value <= time.Duration(2000)*time.Millisecond {
-		atomic.AddUint32(&h.counts[23], 1)
-	} else if value <= time.Duration(3000)*time.Millisecond {
-		atomic.AddUint32(&h.counts[24], 1)
-	} else if value <= time.Duration(4000)*time.Millisecond {
-		atomic.AddUint32(&h.counts[25], 1)
-	} else if value <= time.Duration(5000)*time.Millisecond {
-		atomic.AddUint32(&h.counts[26], 1)
-	} else if value <= time.Duration(6500)*time.Millisecond {
-		atomic.AddUint32(&h.counts[27], 1)
-	} else if value <= time.Duration(8)*time.Second {
-		atomic.AddUint32(&h.counts[28], 1)
-	} else if value <= time.Duration(10)*time.Second {
-		atomic.AddUint32(&h.counts[29], 1)
-	} else if value <= time.Duration(15)*time.Second {
-		atomic.AddUint32(&h.counts[30], 1)
-	} else {
-		atomic.AddUint32(&h.counts[31], 1)
-	}
+	// note: overflows at 4294s, but if you have values this high,
+	// you are definitely not using this histogram for the target use case.
+	micros := uint32(value.Nanoseconds() / 1000)
+
+	i := searchBucket(h.limits, micros)
+	atomic.AddUint32(&h.counts[i], 1)
 }
 
 // Snapshot returns a snapshot of the data and resets internal state
@@ -126,29 +89,52 @@ func (h *Hist1) Snapshot() []uint32 {
 	return snap
 }
 
-func Report(data []uint32) []int {
-	totalCount := uint64(0)
+// if count is 0 then the statistical summaries are invalid
+type Report struct {
+	min    uint32 // in micros
+	mean   uint32 // in micros
+	median uint32 // in micros
+	p75    uint32 // in micros
+	p90    uint32 // in micros
+	max    uint32 // in micros
+	count  uint64
+}
+
+func (h *Hist1) Report(data []uint32) Report {
 	totalValue := uint64(0)
-	var min, max int
+	r := Report{}
 	for i, count := range data {
 		if count > 0 {
-			if min == 0 { // this means we haven't found min yet.
-				min = buckets[i]
+			limit := h.limits[i]
+			// special case, report as 29s
+			if i == 31 {
+				limit = maxVal
 			}
-			max = buckets[i]
-			totalCount += uint64(count)
-			totalValue += uint64(count) * uint64(buckets[i])
+			if r.min == 0 { // this means we haven't found min yet.
+				r.min = limit
+			}
+			r.max = limit
+			r.count += uint64(count)
+			totalValue += uint64(count) * uint64(limit)
 		}
 	}
-	if totalCount == 0 {
-		return nil
+	if r.count == 0 {
+		return r
 	}
-	median := buckets[Quantile(data, 0.50, totalCount)]
-	p75 := buckets[Quantile(data, 0.75, totalCount)]
-	p90 := buckets[Quantile(data, 0.90, totalCount)]
-	mean := int(totalValue / totalCount)
-	res := []int{min, mean, median, p75, p90, max, int(totalCount)}
-	return res
+	r.median = h.limits[Quantile(data, 0.50, r.count)]
+	if r.median == math.MaxUint32 {
+		r.median = maxVal
+	}
+	r.p75 = h.limits[Quantile(data, 0.75, r.count)]
+	if r.p75 == math.MaxUint32 {
+		r.p75 = maxVal
+	}
+	r.p90 = h.limits[Quantile(data, 0.90, r.count)]
+	if r.p90 == math.MaxUint32 {
+		r.p90 = maxVal
+	}
+	r.mean = uint32(totalValue / r.count)
+	return r
 }
 
 // quantile q means what's the value v so that all q of the values have value <= v

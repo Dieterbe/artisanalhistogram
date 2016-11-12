@@ -60,48 +60,41 @@ func Test_Report(t *testing.T) {
 		}
 	}
 
-	stats := Report(snap)
+	r := hist.Report(snap)
 
-	actualTotal := (10 + 4000 + 5000 + 10000 + 3000*1000 + 2002*1000 + 1200000 + 21000000)
+	actualTotal := uint32(10 + 4000 + 5000 + 10000 + 3000*1000 + 2002*1000 + 1200000 + 21000000)
 	actualMean := actualTotal / 10
-	expTotal := 1000 + 2*5000 + 10000 + 3*1000000 + 2*1500000 + 29999999
+	expTotal := uint32(1000 + 2*5000 + 10000 + 3*1000000 + 2*1500000 + 29999999)
 
-	min := stats[0]
-	if min != 1000 {
-		t.Fatalf("expected min %d, got %d", 1000, min)
+	if r.min != 1000 {
+		t.Fatalf("expected min %d, got %d", 1000, r.min)
 	}
 
 	expMean := expTotal / 10
-	mean := stats[1]
-	if mean != expMean {
-		t.Fatalf("expected mean %d, got %d (actual mean %d)", expMean, mean, actualMean)
+	if r.mean != expMean {
+		t.Fatalf("expected mean %d, got %d (actual mean %d)", expMean, r.mean, actualMean)
 	}
-	t.Logf("actual mean %d, our mean %d (big outlier!)", actualMean, mean)
+	t.Logf("actual mean %d, our mean %d (big outlier!)", actualMean, r.mean)
 
-	med := stats[2]
-	if med != 1000000 {
-		t.Fatalf("expected med %d, got %d", 1000000, med)
+	if r.median != 1000000 {
+		t.Fatalf("expected med %d, got %d", 1000000, r.median)
 	}
 
-	p75 := stats[3]
-	if p75 != 1500000 {
-		t.Fatalf("expected p75 %d, got %d", 1500000, p75)
+	if r.p75 != 1500000 {
+		t.Fatalf("expected p75 %d, got %d", 1500000, r.p75)
 	}
 
-	p90 := stats[4]
-	if p90 != 1500000 {
-		t.Fatalf("expected min %d, got %d", 1500000, p90)
+	if r.p90 != 1500000 {
+		t.Fatalf("expected min %d, got %d", 1500000, r.p90)
 	}
 
-	max := stats[5]
-	expMax := 29999999
-	if max != expMax {
-		t.Fatalf("expected max %d, got %d", expMax, max)
+	expMax := uint32(29999999)
+	if r.max != expMax {
+		t.Fatalf("expected max %d, got %d", expMax, r.max)
 	}
 
-	count := stats[6]
-	if count != 10 {
-		t.Fatalf("expected count %d, got %d (actual count %d)", 10, count)
+	if r.count != 10 {
+		t.Fatalf("expected count %d, got %d (actual count %d)", 10, r.count)
 	}
 
 }
@@ -158,7 +151,7 @@ func Benchmark_AddDurationUpto1s(b *testing.B) {
 	}
 }
 
-var _summary []int
+var _report Report
 
 func Benchmark_Report1kvals(b *testing.B) {
 	data := make([]time.Duration, 1000)
@@ -166,7 +159,7 @@ func Benchmark_Report1kvals(b *testing.B) {
 	for i := 0; i < 1000; i++ {
 		data[i] = time.Duration(rand.Intn(1000)) * time.Millisecond
 	}
-	var summary []int
+	var r Report
 
 	b.ResetTimer()
 
@@ -180,8 +173,8 @@ func Benchmark_Report1kvals(b *testing.B) {
 		b.StartTimer()
 
 		snap := hist.Snapshot()
-		summary = Report(snap)
+		r = hist.Report(snap)
 	}
-	_summary = summary
+	_report = r
 
 }

@@ -30,15 +30,15 @@ Getting a report takes about 700ns.
 On my i7-4810MQ CPU @ 2.80GHz : 
 
 ```
-$ go test -bench=.
-Benchmark_AddDurationBest-8               	200000000	         7.35 ns/op
-Benchmark_AddDurationWorst-8              	100000000	        16.6 ns/op
-Benchmark_AddDurationEvenDistribution-8   	100000000	        20.0 ns/op
-Benchmark_AddDurationUpto1s-8             	100000000	        17.0 ns/op
-Benchmark_Report1kvals-8                  	 2000000	       660 ns/op
+Benchmark_AddDurationBest-8               	100000000	        16.4 ns/op
+Benchmark_AddDurationWorst-8              	100000000	        15.8 ns/op
+Benchmark_AddDurationEvenDistribution-8   	100000000	        23.3 ns/op
+Benchmark_AddDurationUpto1s-8             	100000000	        23.7 ns/op
+Benchmark_Report1kvals-8                  	 3000000	       575 ns/op
 PASS
-ok  	github.com/Dieterbe/artisanalhistogram/hist1	102.424s
+ok  	github.com/Dieterbe/artisanalhistogram/hist1	143.013s
 ```
+
 ### warning
 
 if it wasn't clear yet, you need to understand the implications of this approach. For data <1ms or >15s the data will be significantly different from actual results, however, the conclusions
