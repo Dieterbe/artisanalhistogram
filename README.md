@@ -30,13 +30,13 @@ Getting a report takes about 700ns.
 On my i7-4810MQ CPU @ 2.80GHz : 
 
 ```
-Benchmark_AddDurationBest-8               	100000000	        16.4 ns/op
-Benchmark_AddDurationWorst-8              	100000000	        15.8 ns/op
-Benchmark_AddDurationEvenDistribution-8   	100000000	        23.3 ns/op
-Benchmark_AddDurationUpto1s-8             	100000000	        23.7 ns/op
-Benchmark_Report1kvals-8                  	 3000000	       575 ns/op
+Benchmark_AddDurationBest-8               	100000000	        12.7 ns/op
+Benchmark_AddDurationWorst-8              	100000000	        12.6 ns/op
+Benchmark_AddDurationEvenDistribution-8   	100000000	        19.5 ns/op
+Benchmark_AddDurationUpto1s-8             	100000000	        20.8 ns/op
+Benchmark_Report1kvals-8                  	 3000000	       566 ns/op
 PASS
-ok  	github.com/Dieterbe/artisanalhistogram/hist1	143.013s
+ok  	github.com/Dieterbe/artisanalhistogram/hist1	117.842s
 ```
 
 ### warning

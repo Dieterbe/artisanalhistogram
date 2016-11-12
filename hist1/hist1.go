@@ -56,11 +56,12 @@ func New() Hist1 {
 // limits[i-1] < val <= limits[i]
 // if we can convince the go compiler to inline this we can get a 14~22% speedup (verified by manually patching it in)
 // but we can't :( see https://github.com/golang/go/issues/17566
-func searchBucket(limits [32]uint32, val uint32) int {
+// so for now, we just replicate this code in addDuration below. make sure to keep the code in sync!
+func searchBucket(limits [32]uint32, micros uint32) int {
 	min, i, max := 0, 16, 32
 	for {
-		if val <= limits[i] {
-			if i == 0 || val > limits[i-1] {
+		if micros <= limits[i] {
+			if i == 0 || micros > limits[i-1] {
 				return i
 			}
 			max = i
@@ -71,13 +72,24 @@ func searchBucket(limits [32]uint32, val uint32) int {
 	}
 }
 
+// adds to the right bucket with a copy of the searchBucket function below, to enforce inlining.
 func (h *Hist1) AddDuration(value time.Duration) {
 	// note: overflows at 4294s, but if you have values this high,
 	// you are definitely not using this histogram for the target use case.
 	micros := uint32(value.Nanoseconds() / 1000)
-
-	i := searchBucket(h.limits, micros)
-	atomic.AddUint32(&h.counts[i], 1)
+	min, i, max := 0, 16, 32
+	for {
+		if micros <= h.limits[i] {
+			if i == 0 || micros > h.limits[i-1] {
+				atomic.AddUint32(&h.counts[i], 1)
+				return
+			}
+			max = i
+		} else {
+			min = i
+		}
+		i = min + ((max - min) / 2)
+	}
 }
 
 // Snapshot returns a snapshot of the data and resets internal state
