@@ -95,35 +95,35 @@ func Test_Report(t *testing.T) {
 	actualMean := actualTotal / 10
 	expTotal := uint32(1000 + 2*5000 + 10000 + 3*1000000 + 2*1500000 + 29999999)
 
-	if r.min != 1000 {
-		t.Fatalf("expected min %d, got %d", 1000, r.min)
+	if r.Min != 1000 {
+		t.Fatalf("expected min %d, got %d", 1000, r.Min)
 	}
 
 	expMean := expTotal / 10
-	if r.mean != expMean {
-		t.Fatalf("expected mean %d, got %d (actual mean %d)", expMean, r.mean, actualMean)
+	if r.Mean != expMean {
+		t.Fatalf("expected mean %d, got %d (actual mean %d)", expMean, r.Mean, actualMean)
 	}
-	t.Logf("actual mean %d, our mean %d (big outlier!)", actualMean, r.mean)
+	t.Logf("actual mean %d, our mean %d (big outlier!)", actualMean, r.Mean)
 
-	if r.median != 1000000 {
-		t.Fatalf("expected med %d, got %d", 1000000, r.median)
-	}
-
-	if r.p75 != 1500000 {
-		t.Fatalf("expected p75 %d, got %d", 1500000, r.p75)
+	if r.Median != 1000000 {
+		t.Fatalf("expected med %d, got %d", 1000000, r.Median)
 	}
 
-	if r.p90 != 1500000 {
-		t.Fatalf("expected min %d, got %d", 1500000, r.p90)
+	if r.P75 != 1500000 {
+		t.Fatalf("expected p75 %d, got %d", 1500000, r.P75)
+	}
+
+	if r.P90 != 1500000 {
+		t.Fatalf("expected p90 %d, got %d", 1500000, r.P90)
 	}
 
 	expMax := uint32(29999999)
-	if r.max != expMax {
-		t.Fatalf("expected max %d, got %d", expMax, r.max)
+	if r.Max != expMax {
+		t.Fatalf("expected max %d, got %d", expMax, r.Max)
 	}
 
-	if r.count != 10 {
-		t.Fatalf("expected count %d, got %d (actual count %d)", 10, r.count)
+	if r.Count != 10 {
+		t.Fatalf("expected count %d, got %d (actual count %d)", 10, r.Count)
 	}
 
 }

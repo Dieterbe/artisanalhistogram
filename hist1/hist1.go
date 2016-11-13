@@ -103,13 +103,13 @@ func (h *Hist1) Snapshot() []uint32 {
 
 // if count is 0 then the statistical summaries are invalid
 type Report struct {
-	min    uint32 // in micros
-	mean   uint32 // in micros
-	median uint32 // in micros
-	p75    uint32 // in micros
-	p90    uint32 // in micros
-	max    uint32 // in micros
-	count  uint64
+	Min    uint32 // in micros
+	Mean   uint32 // in micros
+	Median uint32 // in micros
+	P75    uint32 // in micros
+	P90    uint32 // in micros
+	Max    uint32 // in micros
+	Count  uint64
 }
 
 func (h *Hist1) Report(data []uint32) Report {
@@ -122,30 +122,30 @@ func (h *Hist1) Report(data []uint32) Report {
 			if i == 31 {
 				limit = maxVal
 			}
-			if r.min == 0 { // this means we haven't found min yet.
-				r.min = limit
+			if r.Min == 0 { // this means we haven't found min yet.
+				r.Min = limit
 			}
-			r.max = limit
-			r.count += uint64(count)
+			r.Max = limit
+			r.Count += uint64(count)
 			totalValue += uint64(count) * uint64(limit)
 		}
 	}
-	if r.count == 0 {
+	if r.Count == 0 {
 		return r
 	}
-	r.median = h.limits[Quantile(data, 0.50, r.count)]
-	if r.median == math.MaxUint32 {
-		r.median = maxVal
+	r.Median = h.limits[Quantile(data, 0.50, r.Count)]
+	if r.Median == math.MaxUint32 {
+		r.Median = maxVal
 	}
-	r.p75 = h.limits[Quantile(data, 0.75, r.count)]
-	if r.p75 == math.MaxUint32 {
-		r.p75 = maxVal
+	r.P75 = h.limits[Quantile(data, 0.75, r.Count)]
+	if r.P75 == math.MaxUint32 {
+		r.P75 = maxVal
 	}
-	r.p90 = h.limits[Quantile(data, 0.90, r.count)]
-	if r.p90 == math.MaxUint32 {
-		r.p90 = maxVal
+	r.P90 = h.limits[Quantile(data, 0.90, r.Count)]
+	if r.P90 == math.MaxUint32 {
+		r.P90 = maxVal
 	}
-	r.mean = uint32(totalValue / r.count)
+	r.Mean = uint32(totalValue / r.Count)
 	return r
 }
 
