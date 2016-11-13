@@ -93,6 +93,10 @@ inf
 ### implementation notes
 
 * 32 buckets because that should fit nicely on graphical UI's + also round size of 128B
-* math.MaxUint32, i.e. 4294967295 should be a reasonable count limit. to save space.
-  (it's easy to warn operators if they get too close to the limit and make them upgrade to bigger structures
-  or shorter their reporting interval, and we can invalidate numbers if we detect an almost overflow)
+* math.MaxUint32, i.e. 4294967295 or "4 billion" should be a reasonable count limit. to save space.
+  it's up to the operator to keep tabs on the bucket counts and judge whether the data is to be trusted or not.
+  if you get anywhere near this volume it's time to look into something better or shorten your reporting interval.
+  unfortunately trying to automatically report almost overflows would be to expensive.
+  Note that for the total count (across all buckets) we do report validity, because that's easy to establish when reporting.
+  but validity of individual buckets is up to the user.
+* because we use uint32 to track microseconds, inserting durations higher than 4294s (71minutes) will also overflow and possibly fall into the wrong buckets

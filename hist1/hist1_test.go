@@ -89,7 +89,10 @@ func Test_Report(t *testing.T) {
 		}
 	}
 
-	r := hist.Report(snap)
+	r, ok := hist.Report(snap)
+	if !ok {
+		t.Fatalf("expected the report to be valid")
+	}
 
 	actualTotal := uint32(10 + 4000 + 5000 + 10000 + 3000*1000 + 2002*1000 + 1200000 + 21000000)
 	actualMean := actualTotal / 10
@@ -202,7 +205,7 @@ func Benchmark_Report1kvals(b *testing.B) {
 		b.StartTimer()
 
 		snap := hist.Snapshot()
-		r = hist.Report(snap)
+		r, _ = hist.Report(snap)
 	}
 	_report = r
 
