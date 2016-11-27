@@ -1,4 +1,4 @@
-package hist1
+package hist15s
 
 import (
 	"math"
@@ -8,13 +8,14 @@ import (
 
 const maxVal = uint32(29999999) // used to report max number as 29s even if it's higher
 
-type Hist1 struct {
+// Hist15s is optimized for measurements between 500ms and 12h
+type Hist15s struct {
 	limits [32]uint32 // in micros
 	counts [32]uint32
 }
 
-func New() Hist1 {
-	return Hist1{
+func New() Hist15s {
+	return Hist15s{
 		limits: [32]uint32{
 			1000,           // 0
 			2000,           // 1
@@ -73,7 +74,7 @@ func searchBucket(limits [32]uint32, micros uint32) int {
 }
 
 // adds to the right bucket with a copy of the searchBucket function below, to enforce inlining.
-func (h *Hist1) AddDuration(value time.Duration) {
+func (h *Hist15s) AddDuration(value time.Duration) {
 	// note: overflows at 4294s, but if you have values this high,
 	// you are definitely not using this histogram for the target use case.
 	micros := uint32(value.Nanoseconds() / 1000)
@@ -93,7 +94,7 @@ func (h *Hist1) AddDuration(value time.Duration) {
 }
 
 // Snapshot returns a snapshot of the data and resets internal state
-func (h *Hist1) Snapshot() []uint32 {
+func (h *Hist15s) Snapshot() []uint32 {
 	snap := make([]uint32, 32)
 	for i := 0; i < 32; i++ {
 		snap[i] = atomic.SwapUint32(&h.counts[i], 0)
@@ -116,7 +117,7 @@ type Report struct {
 // (in either case, we can't compute the summaries)
 // * the total count was 0
 // * the total count overflowed (but we set to 1 so you can tell the difference)
-func (h *Hist1) Report(data []uint32) (Report, bool) {
+func (h *Hist15s) Report(data []uint32) (Report, bool) {
 	totalValue := uint64(0)
 	r := Report{}
 	for i, count := range data {

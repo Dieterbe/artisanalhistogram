@@ -1,7 +1,7 @@
 ## Artisanal histogram
 
 
-Hand crafted histogram, made with love. To power insights from networked applications.  Not general-purpose.
+Hand crafted histograms, made with love. To power insights from networked applications.  Not general-purpose.
 Also somewhat experimental.
 
 

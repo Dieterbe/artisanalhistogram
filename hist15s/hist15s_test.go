@@ -1,4 +1,4 @@
-package hist1
+package hist15s
 
 import (
 	"math/rand"
